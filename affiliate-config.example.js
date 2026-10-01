@@ -1,5 +1,5 @@
 export const affiliateConfig = {
-  amazonAssociateTag: "REPLACE_WITH_AMAZON_TAG",
+  amazonAssociateTag: "electrocomp08-20",
   bestBuyPublisherId: "REPLACE_WITH_BESTBUY_ID",
   walmartPublisherId: "REPLACE_WITH_WALMART_ID"
 };
