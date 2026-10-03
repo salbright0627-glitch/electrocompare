@@ -1,76 +1,30 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>ElectroCompare — Compare Electronics & Find Better Deals</title>
-<meta name="description" content="Compare electronics side-by-side, track price drops, and find retailer deals.">
+<meta name="description" content="Compare electronics and find Amazon shopping links in one place.">
 <style>
-:root{--bg:#f5f7fb;--card:#fff;--text:#101828;--muted:#667085;--line:#e4e7ec;--brand:#5b5ce2;--brand2:#7c3aed;--good:#067647}
-*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;background:var(--bg);color:var(--text)}
-header{background:linear-gradient(135deg,#111827,#272b68 55%,#5b5ce2);color:#fff;padding:22px 6% 76px}
-nav{display:flex;align-items:center;justify-content:space-between;gap:20px;max-width:1180px;margin:auto}.logo{font-size:22px;font-weight:800}.logo span{color:#a5b4fc}nav a{color:#fff;text-decoration:none;margin-left:22px;font-size:14px;opacity:.9}
-.hero{max-width:1180px;margin:55px auto 0}.hero h1{font-size:clamp(38px,6vw,66px);line-height:1.02;max-width:760px;margin:0 0 20px}.hero p{font-size:18px;color:#dbe1ff;max-width:650px}
-.search{display:flex;background:#fff;border-radius:16px;padding:7px;max-width:760px;margin-top:28px;box-shadow:0 20px 50px #11182755}.search input{flex:1;border:0;padding:15px;font-size:16px;outline:0}.search button,.btn{border:0;border-radius:11px;background:var(--brand);color:#fff;padding:13px 19px;font-weight:700;cursor:pointer}
-main{max-width:1180px;margin:-42px auto 70px;padding:0 20px}.panel{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:0 10px 30px #1018280a}.cats{display:flex;gap:10px;overflow:auto}.cat{border:1px solid var(--line);background:#fff;border-radius:999px;padding:10px 15px;cursor:pointer;white-space:nowrap}.cat.active{background:#eef2ff;border-color:#c7d2fe;color:#3730a3}
-.section{margin-top:28px}.section h2{margin:0 0 15px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}.product{background:#fff;border:1px solid var(--line);border-radius:16px;padding:17px}.pic{height:135px;border-radius:12px;background:linear-gradient(145deg,#eef2ff,#f8fafc);display:grid;place-items:center;font-size:58px;margin-bottom:14px}.product h3{font-size:16px;margin:8px 0}.price{font-size:22px;font-weight:800}.muted{color:var(--muted);font-size:13px}.stars{color:#b54708;font-size:14px}.product .btn{width:100%;margin-top:13px}.compare{margin-top:28px}.compare-table{width:100%;border-collapse:collapse}.compare-table th,.compare-table td{padding:14px;border-bottom:1px solid var(--line);text-align:left}.compare-table th{width:28%;background:#fafafa}.deal{color:var(--good);font-weight:700}.newsletter{margin-top:28px;background:#111827;color:#fff;border-radius:18px;padding:28px;display:flex;justify-content:space-between;align-items:center;gap:25px}.newsletter input{padding:13px;border-radius:10px;border:0;width:250px}.fine{font-size:11px;color:#98a2b3;margin-top:18px;line-height:1.5}
-footer{padding:30px 6%;color:var(--muted);text-align:center;font-size:13px}
-@media(max-width:850px){.grid{grid-template-columns:repeat(2,1fr)}nav a{display:none}.newsletter{display:block}.newsletter input{width:70%;margin-top:12px}}
-@media(max-width:520px){.grid{grid-template-columns:1fr}.search{display:block}.search input{width:100%}.search button{width:100%;margin-top:5px}}
-</style>
-</head>
-<body>
-<header>
-<nav><div class="logo">Electro<span>Compare</span></div><div><a href="#compare">Compare</a><a href="#deals">Deals</a><a href="#alerts">Price Alerts</a></div></nav>
-<div class="hero">
-<h1>Compare electronics. Find the deal that fits you.</h1>
-<p>Side-by-side specs, prices and ratings in one place. Built to make electronics shopping simpler.</p>
-<div class="search"><input id="search" placeholder="Search phones, laptops, TVs, headphones…"><button onclick="doSearch()">Search</button></div>
-</div>
-</header>
-
-<main>
-<div class="panel" style="margin-top:0">
-<div class="cats" id="cats">
-<button class="cat active" onclick="filterCat('All',this)">All</button><button class="cat" onclick="filterCat('Phones',this)">📱 Phones</button><button class="cat" onclick="filterCat('Laptops',this)">💻 Laptops</button><button class="cat" onclick="filterCat('Audio',this)">🎧 Audio</button><button class="cat" onclick="filterCat('TVs',this)">📺 TVs</button><button class="cat" onclick="filterCat('Gaming',this)">🎮 Gaming</button>
-</div>
-</div>
-
-<section class="section" id="deals"><h2>Popular comparisons</h2><div class="grid" id="products"></div></section>
-
-<section class="panel compare" id="compare">
-<h2>Example comparison</h2>
-<p class="muted">Select products above to build a comparison. This demo starts with two sample products.</p>
-<table class="compare-table"><tbody id="table"></tbody></table>
-</section>
-
-<section class="newsletter" id="alerts">
-<div><h2 style="margin:0 0 8px">Get price-drop alerts</h2><div style="color:#cbd5e1">Tell us what you're watching and we'll notify you when it hits your target price.</div></div>
-<div><input id="email" type="email" placeholder="you@example.com"><button class="btn" onclick="subscribe()">Notify me</button></div>
-</section>
-<p class="fine">Affiliate-ready demo: retailer buttons can be connected to your approved affiliate IDs and product feeds/APIs. Prices shown here are sample data and should not be presented as live prices until connected to a current data source.</p>
-</main>
+:root{--bg:#f5f7fb;--card:#fff;--text:#101828;--muted:#667085;--line:#e4e7ec;--brand:#5b5ce2}*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--text)}header{background:linear-gradient(135deg,#111827,#272b68,#5b5ce2);color:#fff;padding:22px 6% 76px}nav{display:flex;justify-content:space-between;max-width:1180px;margin:auto}.logo{font-size:22px;font-weight:800}.logo span{color:#a5b4fc}nav a{color:#fff;text-decoration:none;margin-left:22px;font-size:14px}.hero{max-width:1180px;margin:55px auto 0}.hero h1{font-size:clamp(38px,6vw,66px);line-height:1.02;max-width:760px}.hero p{font-size:18px;color:#dbe1ff;max-width:650px}.search{display:flex;background:#fff;border-radius:16px;padding:7px;max-width:760px;margin-top:28px}.search input{flex:1;border:0;padding:15px;font-size:16px;outline:0}.search button,.btn{border:0;border-radius:11px;background:var(--brand);color:#fff;padding:13px 19px;font-weight:700;cursor:pointer}main{max-width:1180px;margin:-42px auto 70px;padding:0 20px}.panel{background:#fff;border:1px solid var(--line);border-radius:18px;padding:22px}.cats{display:flex;gap:10px;overflow:auto}.cat{border:1px solid var(--line);background:#fff;border-radius:999px;padding:10px 15px;cursor:pointer;white-space:nowrap}.cat.active{background:#eef2ff;color:#3730a3}.section{margin-top:28px}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.product{background:#fff;border:1px solid var(--line);border-radius:16px;padding:17px}.pic{height:135px;border-radius:12px;background:#eef2ff;display:grid;place-items:center;font-size:58px}.product h3{font-size:16px}.price{font-size:20px;font-weight:800}.muted{color:var(--muted);font-size:13px}.product .btn{width:100%;margin-top:13px}.amazon{background:#ff9900;color:#111}.compare{margin-top:28px}.compare-table{width:100%;border-collapse:collapse}.compare-table th,.compare-table td{padding:14px;border-bottom:1px solid var(--line);text-align:left}.notice{margin-top:18px;padding:15px;border-radius:12px;background:#fff8e6;border:1px solid #f2d48b;color:#6b5312;font-size:13px;line-height:1.5}.newsletter{margin-top:28px;background:#111827;color:#fff;border-radius:18px;padding:28px;display:flex;justify-content:space-between;gap:25px}.newsletter input{padding:13px;border-radius:10px;border:0}footer{padding:30px 6%;color:var(--muted);text-align:center}@media(max-width:850px){.grid{grid-template-columns:repeat(2,1fr)}nav a{display:none}.newsletter{display:block}}@media(max-width:520px){.grid{grid-template-columns:1fr}.search{display:block}.search input,.search button{width:100%;margin-top:5px}}
+</style></head><body>
+<header><nav><div class="logo">Electro<span>Compare</span></div><div><a href="#compare">Compare</a><a href="#products">Products</a><a href="#alerts">Price Alerts</a></div></nav><div class="hero"><h1>Compare electronics. Find the deal that fits you.</h1><p>Side-by-side specs and retailer links in one place.</p><div class="search"><input id="search" placeholder="Search phones, laptops, TVs, headphones…"><button onclick="doSearch()">Search</button></div></div></header>
+<main><div class="panel"><div class="cats"><button class="cat active" onclick="filterCat('All',this)">All</button><button class="cat" onclick="filterCat('Phones',this)">📱 Phones</button><button class="cat" onclick="filterCat('Laptops',this)">💻 Laptops</button><button class="cat" onclick="filterCat('Audio',this)">🎧 Audio</button><button class="cat" onclick="filterCat('TVs',this)">📺 TVs</button><button class="cat" onclick="filterCat('Gaming',this)">🎮 Gaming</button></div></div>
+<section class="section" id="products"><h2>Featured electronics</h2><div class="grid" id="productGrid"></div></section>
+<section class="panel compare" id="compare"><h2>Side-by-side comparison</h2><p class="muted">Choose Compare on a product.</p><table class="compare-table"><tbody id="table"><tr><td class="muted">Select a product above.</td></tr></tbody></table></section>
+<section class="newsletter" id="alerts"><div><h2>Get price-drop alerts</h2><div>Tell us what you're watching.</div></div><div><input id="email" type="email" placeholder="you@example.com"><button class="btn" onclick="subscribe()">Notify me</button></div></section>
+<div class="notice"><strong>Amazon affiliate disclosure:</strong> As an Amazon Associate I earn from qualifying purchases. ElectroCompare may also earn commissions from other retailer links. Prices can change; follow the retailer link for the current price.</div></main>
 <footer>© 2026 ElectroCompare · About · Contact · Privacy · Affiliate Disclosure</footer>
-
 <script>
+const AMAZON_TAG='electrocomp08-20', amazonSearch=q=>'https://www.amazon.com/s?k='+encodeURIComponent(q)+'&tag='+AMAZON_TAG;
 const data=[
-{id:1,cat:'Phones',icon:'📱',name:'Nova X Pro',price:799,rating:4.6,storage:'256 GB',display:'6.7" OLED',battery:'4,800 mAh'},
-{id:2,cat:'Phones',icon:'📱',name:'PixelMax 10',price:749,rating:4.5,storage:'256 GB',display:'6.5" OLED',battery:'5,000 mAh'},
-{id:3,cat:'Laptops',icon:'💻',name:'ProBook 14',price:1099,rating:4.7,storage:'1 TB SSD',display:'14" 2.8K',battery:'18 hrs'},
-{id:4,cat:'Audio',icon:'🎧',name:'QuietSound Max',price:349,rating:4.6,storage:'—',display:'ANC',battery:'30 hrs'},
-{id:5,cat:'TVs',icon:'📺',name:'Vision OLED 55',price:1299,rating:4.8,storage:'—',display:'55" 4K OLED',battery:'—'},
-{id:6,cat:'Gaming',icon:'🎮',name:'GameBox X',price:499,rating:4.7,storage:'1 TB',display:'4K gaming',battery:'—'}
-];
+{id:1,cat:'Phones',icon:'📱',name:'Apple iPhone 16',search:'Apple iPhone 16 128GB',storage:'128 GB',display:'6.1-inch OLED',use:'USB-C',url:amazonSearch('Apple iPhone 16 128GB')},
+{id:2,cat:'Phones',icon:'📱',name:'Samsung Galaxy S25',search:'Samsung Galaxy S25 256GB',storage:'256 GB',display:'6.2-inch AMOLED',use:'5G',url:amazonSearch('Samsung Galaxy S25 256GB')},
+{id:3,cat:'Laptops',icon:'💻',name:'MacBook Air M4 13-inch',search:'Apple MacBook Air M4 13-inch 256GB',storage:'256 GB SSD',display:'13.6-inch Liquid Retina',use:'Up to 18 hrs',url:amazonSearch('Apple MacBook Air M4 13-inch 256GB')},
+{id:4,cat:'Audio',icon:'🎧',name:'Sony WH-1000XM5',search:'Sony WH-1000XM5',storage:'Wireless',display:'Noise cancelling',use:'Up to 30 hrs',url:amazonSearch('Sony WH-1000XM5')},
+{id:5,cat:'TVs',icon:'📺',name:'LG C4 55-inch OLED',search:'LG C4 55 inch OLED 4K',storage:'—',display:'55-inch 4K OLED',use:'120 Hz',url:amazonSearch('LG C4 55 inch OLED 4K')},
+{id:6,cat:'Gaming',icon:'🎮',name:'PlayStation 5 Slim',search:'PlayStation 5 Slim 1TB',storage:'1 TB',display:'4K gaming',use:'—',url:amazonSearch('PlayStation 5 Slim 1TB')}];
 let shown=data;
-function render(){
-const q=document.getElementById('search').value.toLowerCase();
-const list=shown.filter(x=>x.name.toLowerCase().includes(q)||x.cat.toLowerCase().includes(q));
-document.getElementById('products').innerHTML=list.map(x=>`<article class="product"><div class="pic">${x.icon}</div><div class="muted">${x.cat}</div><h3>${x.name}</h3><div class="stars">★ ${x.rating}</div><div class="price">$${x.price.toLocaleString()}</div><div class="muted">${x.display} · ${x.storage}</div><button class="btn" onclick="compare(${x.id})">Add to compare</button></article>`).join('')||'<p>No products found. Try another search.</p>';
-}
-function filterCat(cat,el){document.querySelectorAll('.cat').forEach(x=>x.classList.remove('active'));el.classList.add('active');shown=cat==='All'?data:data.filter(x=>x.cat===cat);render();}
-function doSearch(){render();document.getElementById('deals').scrollIntoView({behavior:'smooth'});}
-function compare(id){const x=data.find(p=>p.id===id);const y=data.find(p=>p.id!==id&&p.cat===x.cat)||data.find(p=>p.id!==id);document.getElementById('table').innerHTML=`<tr><th></th><th>${x.name}</th><th>${y.name}</th></tr><tr><th>Price</th><td>$${x.price}</td><td>$${y.price}</td></tr><tr><th>Rating</th><td>★ ${x.rating}</td><td>★ ${y.rating}</td></tr><tr><th>Display</th><td>${x.display}</td><td>${y.display}</td></tr><tr><th>Storage</th><td>${x.storage}</td><td>${y.storage}</td></tr><tr><th>Battery</th><td>${x.battery}</td><td>${y.battery}</td></tr><tr><th>Retailers</th><td><button class="btn" onclick="alert('Connect your affiliate retailer link here.')">Check price</button></td><td><button class="btn" onclick="alert('Connect your affiliate retailer link here.')">Check price</button></td></tr>`;document.getElementById('compare').scrollIntoView({behavior:'smooth'});}
-function subscribe(){const e=document.getElementById('email').value;if(!e.includes('@')) return alert('Enter a valid email.');alert('Demo signup saved. Connect this form to your email provider before launch.');}
+function render(){const q=document.getElementById('search').value.toLowerCase(),list=shown.filter(x=>x.name.toLowerCase().includes(q)||x.cat.toLowerCase().includes(q)||x.search.toLowerCase().includes(q));document.getElementById('productGrid').innerHTML=list.map(x=>'<article class="product"><div class="pic">'+x.icon+'</div><div class="muted">'+x.cat+'</div><h3>'+x.name+'</h3><div class="price">See current price</div><div class="muted">'+x.display+' · '+x.storage+'</div><button class="btn" onclick="compare('+x.id+')">Compare</button><a class="btn amazon" style="display:block;text-align:center;text-decoration:none;margin-top:8px" href="'+x.url+'" target="_blank" rel="nofollow sponsored noopener">Check price on Amazon</a></article>').join('')||'<p>No products found.</p>'}
+function filterCat(cat,el){document.querySelectorAll('.cat').forEach(x=>x.classList.remove('active'));el.classList.add('active');shown=cat==='All'?data:data.filter(x=>x.cat===cat);render()}
+function doSearch(){render();document.getElementById('products').scrollIntoView({behavior:'smooth'})}
+function compare(id){const x=data.find(p=>p.id===id),y=data.find(p=>p.id!==id&&p.cat===x.cat)||data.find(p=>p.id!==id);document.getElementById('table').innerHTML='<tr><th></th><th>'+x.name+'</th><th>'+y.name+'</th></tr><tr><th>Storage</th><td>'+x.storage+'</td><td>'+y.storage+'</td></tr><tr><th>Display</th><td>'+x.display+'</td><td>'+y.display+'</td></tr><tr><th>Use</th><td>'+x.use+'</td><td>'+y.use+'</td></tr><tr><th>Amazon</th><td><a class="btn amazon" href="'+x.url+'" target="_blank" rel="nofollow sponsored noopener">Check price</a></td><td><a class="btn amazon" href="'+y.url+'" target="_blank" rel="nofollow sponsored noopener">Check price</a></td></tr>';document.getElementById('compare').scrollIntoView({behavior:'smooth'})}
+function subscribe(){const e=document.getElementById('email').value;if(!e.includes('@'))return alert('Enter a valid email.');alert('Demo signup saved. Connect an email provider before launch.')}
 render();
-</script>
-</body></html>
+</script></body></html>
