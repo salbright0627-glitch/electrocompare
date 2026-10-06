@@ -1,13 +1,39 @@
 (() => {
   const products = window.PRODUCTS || [];
   const categories = ['All', ...new Set(products.map(p => p.category))];
-  const state = { query: '', category: 'All', sort: 'featured', selected: [] };
+  const params = new URLSearchParams(window.location.search);
+  const requestedCategory = params.get('category') || 'All';
+  const state = { query: params.get('q') || '', category: categories.includes(requestedCategory) ? requestedCategory : 'All', sort: 'featured', selected: [] };
   const $ = id => document.getElementById(id);
   const esc = value => String(value ?? '').replace(/[&<>'"]/g, c => ({
     '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#39;', '"':'&quot;'
   }[c]));
   const amazon = p => `https://www.amazon.com/s?k=${encodeURIComponent(p.name)}&tag=electrocomp08-20`;
   const price = n => '$' + Number(n || 0).toLocaleString();
+
+  function updateSeo() {
+    const base = 'https://electrocompare.net/';
+    const title = state.category === 'All'
+      ? 'ElectroCompare — Compare Electronics Before You Buy'
+      : `Best ${state.category} to Compare — ElectroCompare`;
+    const description = state.category === 'All'
+      ? 'Compare top electronics side-by-side with ElectroCompare. Explore phones, laptops, audio, TVs, gaming, tablets, cameras, monitors, smart home, networking, storage and accessories.'
+      : `Compare ${state.category.toLowerCase()} products side-by-side on ElectroCompare. Search popular products, review key details and find buying options.`;
+    document.title = title;
+    const meta = document.querySelector('meta[name="description"]');
+    if (meta) meta.setAttribute('content', description);
+    const canonical = document.querySelector('link[rel="canonical"]');
+    if (canonical) canonical.setAttribute('href', state.category === 'All' ? base : `${base}?category=${encodeURIComponent(state.category)}`);
+  }
+
+  function syncUrl() {
+    const params = new URLSearchParams();
+    if (state.category !== 'All') params.set('category', state.category);
+    if (state.query) params.set('q', state.query);
+    const next = params.toString() ? `${location.pathname}?${params.toString()}` : location.pathname;
+    history.replaceState(null, '', next);
+    updateSeo();
+  }
 
   function renderCategories() {
     $('categories').innerHTML = categories.map(c =>
@@ -122,6 +148,7 @@
     const categoryButton = event.target.closest('[data-cat]');
     if (categoryButton) {
       state.category = categoryButton.dataset.cat;
+      syncUrl();
       renderCategories();
       renderProducts();
     }
@@ -129,6 +156,7 @@
 
   $('search').addEventListener('input', event => {
     state.query = event.target.value;
+    syncUrl();
     renderProducts();
   });
 
@@ -153,6 +181,8 @@
     renderProducts();
   });
 
+  $('search').value = state.query;
+  updateSeo();
   renderCategories();
   renderProducts();
 })();
