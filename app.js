@@ -1,19 +1,158 @@
 (() => {
   const products = window.PRODUCTS || [];
-  const categories = ['All', ...new Set(products.map(p=>p.category))];
-  let state = {query:'', category:'All', sort:'featured', selected:[]};
+  const categories = ['All', ...new Set(products.map(p => p.category))];
+  const state = { query: '', category: 'All', sort: 'featured', selected: [] };
   const $ = id => document.getElementById(id);
-  const esc = s => String(s).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+  const esc = value => String(value ?? '').replace(/[&<>'"]/g, c => ({
+    '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#39;', '"':'&quot;'
+  }[c]));
   const amazon = p => `https://www.amazon.com/s?k=${encodeURIComponent(p.name)}&tag=electrocomp08-20`;
-  const price = n => '$'+n.toLocaleString();
-  const renderCategories = () => $('categories').innerHTML = categories.map(c=>`<button class="chip ${state.category===c?'active':''}" data-cat="${esc(c)}">${esc(c)}</button>`).join('');
-  const filtered = () => { let a=products.filter(p=>(state.category==='All'||p.category===state.category)&&(`${p.name} ${p.brand} ${p.category} ${p.desc}`).toLowerCase().includes(state.query.toLowerCase())); if(state.sort==='az')a.sort((x,y)=>x.name.localeCompare(y.name)); if(state.sort==='za')a.sort((x,y)=>y.name.localeCompare(x.name)); if(state.sort==='priceLow')a.sort((x,y)=>x.price-y.price); if(state.sort==='priceHigh')a.sort((x,y)=>y.price-x.price); return a; };
-  const renderVisual = p => `<div class="visual"><span class="badge">${esc(p.brand)}</span><div class="device ${esc(p.type)}">${esc(p.name)}</div></div>`;
-  const render = () => { const a=filtered(); $('resultCount').textContent=`${a.length} product${a.length===1?'':'s'}`; $('grid').innerHTML=a.map(p=>{const sel=state.selected.includes(p.id);return `<article class="product-card">${renderVisual(p)}<div class="product-body"><div class="category">${esc(p.category)}</div><h3>${esc(p.name)}</h3><div class="meta">${esc(p.desc)}</div><div class="price">${price(p.price)}</div><div class="actions"><a class="buy" href="${amazon(p)}" target="_blank" rel="nofollow sponsored noopener">View on Amazon</a><button class="compare-btn ${sel?'selected':''}" data-id="${p.id}" ${!sel&&state.selected.length>=3?'disabled':''}>${sel?'✓ Selected':'Compare'}</button></div></div></article>`}).join(''); $('empty').hidden=a.length!==0; bindCards(); updateCompare(); };
-  const bindCards=()=>document.querySelectorAll('.compare-btn').forEach(b=>b.addEventListener('click',()=>{const id=Number(b.dataset.id);if(state.selected.includes(id))state.selected=state.selected.filter(x=>x!==id);else if(state.selected.length<3)state.selected.push(id);render();}));
-  const updateCompare=()=>{ $('compareCount').textContent=state.selected.length; $('compareLabel').textContent=`${state.selected.length} selected`; $('compareBar').hidden=state.selected.length===0; };
-  const showCompare=()=>{if(!state.selected.length)return;const ps=state.selected.map(id=>products.find(p=>p.id===id)).filter(Boolean);const rows=[['Product',ps.map(p=>`<div class="compare-product"><b>${esc(p.name)}</b><br><small>${esc(p.brand)}</small><br><button class="remove" data-remove="${p.id}">Remove</button></div>`).join('')],['Category',ps.map(p=>esc(p.category)).join('</td><td>')],['Price',ps.map(p=>price(p.price)).join('</td><td>')],['Description',ps.map(p=>esc(p.desc)).join('</td><td>')],['Amazon',ps.map(p=>`<a href="${amazon(p)}" target="_blank" rel="nofollow sponsored noopener">View listing</a>`).join('</td><td>')]];let html='<div class="comparison"><table><tbody>';rows.forEach((r,i)=>{html+=`<tr><th>${r[0]}</th>${i===0?r[1].split('</div>___').join('</div>'):''}`;if(i===0){const cells=r[1].match(/<div class="compare-product">[\s\S]*?<\/div>/g)||[];html='<div class="comparison"><table><tbody><tr><th>Product</th>'+cells.map(x=>`<td>${x}</td>`).join('')+'</tr>';}else html+=r[1].split('</td><td>').map(x=>`<td>${x}</td>`).join('');html+='</tr>';});html+='</tbody></table></div>'; $('compareTable').innerHTML=html; $('compareModal').hidden=false;document.querySelectorAll('[data-remove]').forEach(b=>b.addEventListener('click',()=>{state.selected=state.selected.filter(id=>id!==Number(b.dataset.remove));showCompare();render();}));};
-  document.addEventListener('click',e=>{const c=e.target.closest('[data-cat]');if(c){state.category=c.dataset.cat;renderCategories();render();}});
-  $('search').addEventListener('input',e=>{state.query=e.target.value;render();}); $('sort').addEventListener('change',e=>{state.sort=e.target.value;render();}); $('compareNow').addEventListener('click',showCompare); $('compareOpen').addEventListener('click',showCompare); $('compareClose').addEventListener('click',()=> $('compareModal').hidden=true); $('compareModal').addEventListener('click',e=>{if(e.target.id==='compareModal')$('compareModal').hidden=true;}); $('clearCompare').addEventListener('click',()=>{state.selected=[];render();});
-  renderCategories();render();
+  const price = n => '$' + Number(n || 0).toLocaleString();
+
+  function renderCategories() {
+    $('categories').innerHTML = categories.map(c =>
+      `<button class="chip ${state.category === c ? 'active' : ''}" data-cat="${esc(c)}">${esc(c)}</button>`
+    ).join('');
+  }
+
+  function filteredProducts() {
+    let list = products.filter(p => {
+      const categoryOK = state.category === 'All' || p.category === state.category;
+      const text = `${p.name} ${p.brand} ${p.category} ${p.desc}`.toLowerCase();
+      return categoryOK && text.includes(state.query.toLowerCase());
+    });
+    if (state.sort === 'az') list.sort((a,b) => a.name.localeCompare(b.name));
+    if (state.sort === 'za') list.sort((a,b) => b.name.localeCompare(a.name));
+    if (state.sort === 'priceLow') list.sort((a,b) => a.price - b.price);
+    if (state.sort === 'priceHigh') list.sort((a,b) => b.price - a.price);
+    return list;
+  }
+
+  function renderVisual(p) {
+    return `<div class="visual">
+      <span class="badge">${esc(p.brand)}</span>
+      <div class="device ${esc(p.type || '')}">${esc(p.name)}</div>
+    </div>`;
+  }
+
+  function renderProducts() {
+    const list = filteredProducts();
+    $('resultCount').textContent = `${list.length} product${list.length === 1 ? '' : 's'}`;
+    $('grid').innerHTML = list.map(p => {
+      const selected = state.selected.includes(p.id);
+      const disabled = !selected && state.selected.length >= 3;
+      return `<article class="product-card">
+        ${renderVisual(p)}
+        <div class="product-body">
+          <div class="category">${esc(p.category)}</div>
+          <h3>${esc(p.name)}</h3>
+          <div class="meta">${esc(p.desc)}</div>
+          <div class="price">${price(p.price)}</div>
+          <div class="actions">
+            <a class="buy" href="${amazon(p)}" target="_blank" rel="nofollow sponsored noopener">View on Amazon</a>
+            <button class="compare-btn ${selected ? 'selected' : ''}" data-id="${p.id}" ${disabled ? 'disabled' : ''}>
+              ${selected ? '✓ Selected' : 'Compare'}
+            </button>
+          </div>
+        </div>
+      </article>`;
+    }).join('');
+    $('empty').hidden = list.length !== 0;
+    bindCompareButtons();
+    updateCompareUI();
+  }
+
+  function bindCompareButtons() {
+    document.querySelectorAll('.compare-btn').forEach(button => {
+      button.addEventListener('click', () => {
+        const id = Number(button.dataset.id);
+        if (state.selected.includes(id)) {
+          state.selected = state.selected.filter(x => x !== id);
+        } else if (state.selected.length < 3) {
+          state.selected.push(id);
+        }
+        renderProducts();
+      });
+    });
+  }
+
+  function updateCompareUI() {
+    $('compareCount').textContent = state.selected.length;
+    $('compareLabel').textContent = `${state.selected.length} selected`;
+    $('compareBar').hidden = state.selected.length === 0;
+  }
+
+  function buildComparison() {
+    const selectedProducts = state.selected
+      .map(id => products.find(p => p.id === id))
+      .filter(Boolean);
+
+    if (!selectedProducts.length) return;
+
+    const rows = [
+      ['Product', p => `<strong>${esc(p.name)}</strong><br><small>${esc(p.brand)}</small><br><button class="remove" data-remove="${p.id}">Remove</button>`],
+      ['Category', p => esc(p.category)],
+      ['Price', p => price(p.price)],
+      ['Description', p => esc(p.desc)],
+      ['Amazon', p => `<a href="${amazon(p)}" target="_blank" rel="nofollow sponsored noopener">View listing</a>`]
+    ];
+
+    $('compareTable').innerHTML = `<div class="comparison"><table><tbody>
+      ${rows.map(([label, fn]) => `<tr><th>${label}</th>${selectedProducts.map(p => `<td>${fn(p)}</td>`).join('')}</tr>`).join('')}
+    </tbody></table></div>`;
+
+    $('compareModal').hidden = false;
+    $('compareModal').scrollTop = 0;
+
+    document.querySelectorAll('[data-remove]').forEach(button => {
+      button.addEventListener('click', () => {
+        const id = Number(button.dataset.remove);
+        state.selected = state.selected.filter(x => x !== id);
+        if (!state.selected.length) {
+          $('compareModal').hidden = true;
+        } else {
+          buildComparison();
+        }
+        renderProducts();
+      });
+    });
+  }
+
+  document.addEventListener('click', event => {
+    const categoryButton = event.target.closest('[data-cat]');
+    if (categoryButton) {
+      state.category = categoryButton.dataset.cat;
+      renderCategories();
+      renderProducts();
+    }
+  });
+
+  $('search').addEventListener('input', event => {
+    state.query = event.target.value;
+    renderProducts();
+  });
+
+  $('sort').addEventListener('change', event => {
+    state.sort = event.target.value;
+    renderProducts();
+  });
+
+  $('compareNow').addEventListener('click', buildComparison);
+  $('compareOpen').addEventListener('click', () => {
+    if (state.selected.length) buildComparison();
+  });
+  $('compareClose').addEventListener('click', () => {
+    $('compareModal').hidden = true;
+  });
+  $('compareModal').addEventListener('click', event => {
+    if (event.target.id === 'compareModal') $('compareModal').hidden = true;
+  });
+  $('clearCompare').addEventListener('click', () => {
+    state.selected = [];
+    $('compareModal').hidden = true;
+    renderProducts();
+  });
+
+  renderCategories();
+  renderProducts();
 })();
